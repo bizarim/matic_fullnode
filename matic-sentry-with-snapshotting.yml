@@ -30,7 +30,9 @@ services:
         && sed -i '/26657/c\laddr = \"tcp://0.0.0.0:26657\"' /root/.heimdalld/config/config.toml \
         && sed -i '/bor_rpc_url/c\bor_rpc_url = \"${HEIMDALL_BOR_RPC_URL}\"' /root/.heimdalld/config/heimdall-config.toml \
         && sed -i '/eth_rpc_url/c\eth_rpc_url = \"${HEIMDALL_ETH_RPC_URL}\"' /root/.heimdalld/config/heimdall-config.toml \
-        && cd /root/scripts && ./heimdall-startup.sh && sleep infinity
+        && cd /root/scripts  \
+        && ./heimdall-startup.sh  \
+        && sleep infinity
 
     container_name: heimdall0
     networks:

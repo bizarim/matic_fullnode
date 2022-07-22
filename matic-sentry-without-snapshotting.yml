@@ -11,16 +11,20 @@ services:
 
   heimdall0:
     image: "maticnetwork/heimdall:${HEIMDALL_TAG}"
-    command: >
-      bash -c "
+    command:
+      - bash 
+      - -c
+      - |
         heimdalld init --home /root/.heimdalld --chain-id ${HEIMDALL_CHAIN_ID} \
         && wget -O /root/.heimdalld/config/genesis.json ${HEIMDALL_GENESIS_URL} -P /root/.heimdalld/config \
         && sed -i '/seeds =/c\seeds = \"${HEIMDALL_SEEDS}\"' /root/.heimdalld/config/config.toml \
         && sed -i '/26657/c\laddr = \"tcp://0.0.0.0:26657\"' /root/.heimdalld/config/config.toml \
         && sed -i '/bor_rpc_url/c\bor_rpc_url = \"${HEIMDALL_BOR_RPC_URL}\"' /root/.heimdalld/config/heimdall-config.toml \
         && sed -i '/eth_rpc_url/c\eth_rpc_url = \"${HEIMDALL_ETH_RPC_URL}\"' /root/.heimdalld/config/heimdall-config.toml \
-        && cd /root/scripts && ./heimdall-startup.sh && sleep infinity
-      "
+        && cd /root/scripts  \
+        && ./heimdall-startup.sh  \
+        && sleep infinity
+      
     container_name: heimdall0
     networks:
       - devnet-network
@@ -36,8 +40,10 @@ services:
   bor0:
     image: "maticnetwork/bor:${BOR_TAG}"
     container_name: bor0
-    command: >
-      sh -c "
+    command: 
+      - sh 
+      - -c
+      - |
         cd /root \
         && wget -O setup.sh ${BOR_SETUP} \
         && wget -O genesis.json ${BOR_GENESIS} \
@@ -51,7 +57,7 @@ services:
         && sed -i '/datadir/ a --bootnodes \"${BOR_BOOTNODES}\" \\\' start.sh \
         && sed -i '/datadir/ a --bor.heimdall http://heimdall0:1317 \\\' start.sh \
         && sh start.sh
-      "
+      
     networks:
       devnet-network:
           ipv4_address: 172.20.1.100
