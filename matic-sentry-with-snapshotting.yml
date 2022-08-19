@@ -15,7 +15,8 @@ services:
       - bash 
       - -c
       - |
-        if [ ! -f "/root/.heimdalld/config/config.toml" ]
+        mkdir -p /root/.heimdalld/data \
+        && if [ ! -f "/root/.heimdalld/config/config.toml" ]
         then
           if [ ${BOR_MODE} == "archive" ]
           then
@@ -55,7 +56,7 @@ services:
       - sh 
       - -c
       - |
-        mkdir -p /root/.bor/data/bor \
+        mkdir -p /root/.bor/data/bor/chaindata \
         && cd /root \
         && wget -O setup.sh ${BOR_SETUP} \
         && wget -O genesis.json ${BOR_GENESIS} \
