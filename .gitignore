@@ -1,4 +1,5 @@
-bor/data
+bor/.bor
+bor/config
 bor/snapshot
 heimdall/heimdalld
 heimdall/logs

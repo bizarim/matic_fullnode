@@ -17,10 +17,10 @@ services:
       - |
         heimdalld init --home /root/.heimdalld --chain-id ${HEIMDALL_CHAIN_ID} \
         && wget -O /root/.heimdalld/config/genesis.json ${HEIMDALL_GENESIS_URL} -P /root/.heimdalld/config \
-        && sed -i '/seeds =/c\seeds = \"${HEIMDALL_SEEDS}\"' /root/.heimdalld/config/config.toml \
-        && sed -i '/26657/c\laddr = \"tcp://0.0.0.0:26657\"' /root/.heimdalld/config/config.toml \
-        && sed -i '/bor_rpc_url/c\bor_rpc_url = \"${HEIMDALL_BOR_RPC_URL}\"' /root/.heimdalld/config/heimdall-config.toml \
-        && sed -i '/eth_rpc_url/c\eth_rpc_url = \"${HEIMDALL_ETH_RPC_URL}\"' /root/.heimdalld/config/heimdall-config.toml \
+        && sed -i '/seeds =/c\seeds = "${HEIMDALL_SEEDS}"' /root/.heimdalld/config/config.toml \
+        && sed -i '/26657/c\laddr = "tcp://0.0.0.0:26657"' /root/.heimdalld/config/config.toml \
+        && sed -i '/bor_rpc_url/c\bor_rpc_url = "${HEIMDALL_BOR_RPC_URL}"' /root/.heimdalld/config/heimdall-config.toml \
+        && sed -i '/eth_rpc_url/c\eth_rpc_url = "${HEIMDALL_ETH_RPC_URL}"' /root/.heimdalld/config/heimdall-config.toml \
         && cd /root/scripts  \
         && ./heimdall-startup.sh  \
         && sleep infinity
@@ -50,11 +50,11 @@ services:
         && wget -O static-nodes.json ${BOR_STATIC_FILE} \
         && sh setup.sh \
         && wget -O start.sh ${BOR_START} \
-        && if [ \"${BOR_MODE}\" == \"archive\" ]
+        && if [ "${BOR_MODE}" == "archive" ]
           then
-            sed -i '/datadir/ a --gcmode \"archive\" \\\' start.sh && sed -i '/datadir/ a --ws --ws.port 8546 --ws.addr 0.0.0.0 --ws.origins \"*\" \\\' start.sh 
+            sed -i '/datadir/ a --gcmode "archive" \\\' start.sh && sed -i '/datadir/ a --ws --ws.port 8546 --ws.addr 0.0.0.0 --ws.origins "*" \\\' start.sh 
           fi \
-        && sed -i '/datadir/ a --bootnodes \"${BOR_BOOTNODES}\" \\\' start.sh \
+        && sed -i '/datadir/ a --bootnodes "${BOR_BOOTNODES}" \\\' start.sh \
         && sed -i '/datadir/ a --bor.heimdall http://heimdall0:1317 \\\' start.sh \
         && sh start.sh
       
@@ -62,6 +62,7 @@ services:
       devnet-network:
           ipv4_address: 172.20.1.100
     volumes:
+      - ./bor/root:/root
       - ./bor/data:/root/.bor
     ports:
       - "8545:8545"

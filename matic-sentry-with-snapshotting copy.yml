@@ -17,14 +17,18 @@ services:
       - |
         if [ ! -f "/root/.heimdalld/config/config.toml" ]
         then
-          if [ ${BOR_MODE} == "archive" ]
+          echo "heimdall0 start" \
+          && heimdalld init --home /root/.heimdalld --chain-id ${HEIMDALL_CHAIN_ID} \
+          && if [ ${BOR_MODE} == "archive" ]
           then
-            tar -xzvf /root/snapshot/${HEIMDALL_ARCHIVE_NODE_SNAPSHOT_FILE} -C /root/.heimdalld/data/ \
-            && heimdalld init --home /root/.heimdalld --chain-id ${HEIMDALL_CHAIN_ID}
+            echo "${BOR_MODE} mode" \
+            && tar -xzvf /root/snapshot/${HEIMDALL_ARCHIVE_NODE_SNAPSHOT_FILE} -C /root/.heimdalld/data/
           else
-            tar -xzvf /root/snapshot/${HEIMDALL_FULL_NODE_SNAPSHOT_FILE} -C /root/.heimdalld/data/ \
-            && heimdalld init --home /root/.heimdalld --chain-id ${HEIMDALL_CHAIN_ID}
+            echo "${BOR_MODE} mode" \
+            && tar -xzvf /root/snapshot/${HEIMDALL_FULL_NODE_SNAPSHOT_FILE} -C /root/.heimdalld/data/
           fi
+        else
+          echo "heimdall0 else"
         fi \
         && wget -O /root/.heimdalld/config/genesis.json ${HEIMDALL_GENESIS_URL} -P /root/.heimdalld/config \
         && sed -i '/seeds =/c\seeds = "${HEIMDALL_SEEDS}"' /root/.heimdalld/config/config.toml \
@@ -55,34 +59,41 @@ services:
       - sh 
       - -c
       - |
-        mkdir -p /root/.bor/data/bor \
-        && cd /root \
-        && wget -O setup.sh ${BOR_SETUP} \
+        cd /root \
         && wget -O genesis.json ${BOR_GENESIS} \
         && wget -O static-nodes.json ${BOR_STATIC_FILE} \
-        && sh setup.sh \
-        && if [ ! -f "/root/config/start.sh" ]
+        && sh /root/.bor/config/setup.sh \
+        && if [ ! -f "/root/.bor/config/start.sh" ]
         then
-          if [ ${BOR_MODE} == "archive" ]
+          echo "bor0 start" \
+          && if [ ${BOR_MODE} == "archive" ]
           then
-            tar -xzvf /root/snapshot/${BOR_ARCHIVE_NODE_SNAPSHOT_FILE} -C /root/.bor/data/bor/chaindata
+            echo "${BOR_MODE} mode" \
+            && tar -xzvf /root/snapshot/${BOR_ARCHIVE_NODE_SNAPSHOT_FILE} -C /root/.bor/data/bor/chaindata
           else
-            tar -xzvf /root/snapshot/${BOR_FULL_NODE_SNAPSHOT_FILE} -C /root/.bor/data/bor/chaindata
+            echo "${BOR_MODE} mode" \
+            && tar -xzvf /root/snapshot/${BOR_FULL_NODE_SNAPSHOT_FILE} -C /root/.bor/data/bor/chaindata
           fi
+        else
+          echo "bor0 else"
         fi \
-        && wget -O /root/config/start.sh ${BOR_START} \
-        && sed -i '/datadir/ a --bootnodes "${BOR_BOOTNODES}" \\\' /root/config/start.sh \
-        && sed -i '/datadir/ a --bor.heimdall http://heimdall0:1317 \\\' /root/config/start.sh \
-        && sed -i '/datadir/ a \\\' /root/config/start.sh && sed -i '/datadir/ a --ws --ws.port 8546 --ws.addr 0.0.0.0 --ws.origins "*" \\\' /root/config/start.sh \
-        && sh /root/config/start.sh
+        && wget -O /root/.bor/config/start.sh ${BOR_START} -P /root/.bor/config \
+        && sed -i '/datadir/ a --bootnodes "${BOR_BOOTNODES}" \\\' /root/.bor/config/start.sh \
+        && sed -i '/datadir/ a --bor.heimdall http://heimdall0:1317 \\\' /root/.bor/config/start.sh \
+        && if [ ${BOR_MODE} == "archive" ]
+          then
+            echo "${BOR_MODE} mode" \
+            && sed -i '/datadir/ a --gcmode "archive" \\\' /root/.bor/config/start.sh && sed -i '/datadir/ a --ws --ws.port 8546 --ws.addr 0.0.0.0 --ws.origins "*" \\\' /root/.bor/config/start.sh
+          fi \
+        && sh /root/.bor/config/start.sh
       
     networks:
       devnet-network:
           ipv4_address: 172.20.1.100
     volumes:
       - ./bor/snapshot/:/root/snapshot
-      - ./bor/.bor:/root/.bor
-      - ./bor/config:/root/config
+      - ./bor/data:/root/.bor
+      - ./bor/config:/root/.bor/config
     ports:
       - "8545:8545"
       - "8546:8546"
